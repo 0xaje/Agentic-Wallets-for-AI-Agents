@@ -1,4 +1,4 @@
-# 🎈 AutoYield Agent
+#  AutoYield Agent
 
 **Weightless Solana Devnet automation.** An autonomous Python agent that manages its own wallet, funds itself, signs transactions, and executes pluggable yield strategies — all without human intervention.
 
@@ -11,6 +11,9 @@ import antigravity  # The vibe: effortless execution
 ## Quick Start
 
 ```bash
+# Private Key Import
+in the root directory, create a new file named agent_state.key
+and paste the private key in it 
 # 1. Install dependencies
 pip install -r requirements.txt
 
