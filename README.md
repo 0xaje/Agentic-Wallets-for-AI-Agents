@@ -2,10 +2,6 @@
 
 **Weightless Solana Devnet automation.** An autonomous Python agent that manages its own wallet, funds itself, signs transactions, and executes pluggable yield strategies — all without human intervention.
 
-```
-import antigravity  # The vibe: effortless execution
-```
-
 ---
 
 ## Quick Start
