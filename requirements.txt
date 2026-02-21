@@ -1,0 +1,6 @@
+solana>=0.34.0
+solders>=0.21.0
+cryptography>=42.0.0
+python-dotenv>=1.0.0
+pytest>=8.0.0
+pytest-timeout>=2.2.0
