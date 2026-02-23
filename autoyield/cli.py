@@ -21,7 +21,9 @@ from autoyield.strategies import (
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="autoyield",
-        description="AutoYield Agent -- Weightless Solana Devnet Automation",
+        description="""
+AutoYield Agent — Solana Devnet Automation.
+"""
     )
     parser.add_argument(
         "--quiet", "-q", action="store_true", help="Suppress informational output"
@@ -95,7 +97,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     # All other commands need a wallet
-    log.boot("--- Booting Antigravity Protocol ---")
+    log.boot("--- Booting AutoYield Protocol ---")
     wallet = AgentWallet(config=cfg, logger=log)
     log.boot(f"Identity: {wallet.address}")
 
