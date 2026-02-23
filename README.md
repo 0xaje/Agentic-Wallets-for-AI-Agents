@@ -36,6 +36,13 @@ Most of what you'll do is through `agent.py`:
 
 If you want to get specific, you can use flags like `--strategy sweep --vault <ADDR>` or set a loop limit with `--rounds 5`.
 
+### 💻 Web Dashboard (Recommended)
+You can also monitor and control the agent from a browser:
+```bash
+python dashboard/app.py
+```
+Then open `http://localhost:5000` in your browser.
+
 ## How it works
 
 The project is split into a few core modules:
