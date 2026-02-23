@@ -1,7 +1,5 @@
 """
-AutoYield Agent — Weightless Solana Devnet Automation.
-
-import antigravity  # 🎈
+AutoYield Agent — Solana Devnet Automation.
 """
 
 __version__ = "0.1.0"

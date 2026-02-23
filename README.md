@@ -1,119 +1,66 @@
-#  AutoYield Agent
+# AutoYield
 
-**Weightless Solana Devnet automation.** An autonomous Python agent that manages its own wallet, funds itself, signs transactions, and executes pluggable yield strategies — all without human intervention.
+AutoYield is a small autonomous agent for the Solana Devnet. It manages its own wallet, handles its own funding via airdrops, and runs simple yield strategies without you having to touch it.
 
----
+## What is this?
 
-## Quick Start
+Think of it as a "set and forget" bot for the Solana testing playground. It’s built to demonstrate how an agent can independently sign transactions and manage its balance on-chain. It uses Devnet SOL (test money), so it's completely safe for experimentation.
 
+- **It's independent**: Once it's up, it handles the logic and signing on its own.
+- **It's for testing**: Specifically designed for Devnet to get a feel for automated on-chain behavior.
+- **It's simple**: No complex UI—just clean logs in your terminal.
+
+## Getting Started
+
+### 1. The Wallet
+The agent needs a private key to act as its identity.
+- Create a file in the root directory called `agent_state.key`.
+- Paste your Solana private key (the base58 string) into that file.
+
+> [!NOTE]
+> This file is already in the `.gitignore`, so it won't be pushed to your repo. Keep it private.
+
+### 2. Setup
+Install the necessary Python packages:
 ```bash
-# Private Key Import
-in the root directory, create a new file named agent_state.key
-and paste the private key in it 
-# 1. Install dependencies
 pip install -r requirements.txt
-
-# 2. (Optional) Set encryption passphrase
-#    Copy .env.example → .env and set AUTOYIELD_PASSPHRASE
-cp .env.example .env
-
-# 3. Check status (creates wallet on first run)
-python agent.py status
-
-# 4. Fund the wallet via Devnet airdrop
-python agent.py fund
-
-# 5. Execute an autonomous strategy round
-python agent.py run
 ```
 
----
+### 3. Usage
+Most of what you'll do is through `agent.py`:
 
-## Architecture
+- **Check status**: `python agent.py status` (Shows your address and current SOL)
+- **Get funds**: `python agent.py fund` (Asks the Devnet faucet for some test SOL)
+- **Run it**: `python agent.py run` (Starts the autonomous loop)
+- **Wipe everything**: `python agent.py reset` (Deletes the local key file to start fresh)
 
-```mermaid
-graph TD
-    A["agent.py"] --> B["cli.py"]
-    B --> C["AgentWallet"]
-    B --> D["StrategyRunner"]
-    C --> E["config.py"]
-    C --> F["logger.py"]
-    C --> G["Solana Devnet RPC"]
-    D --> H["RandomTransfer"]
-    D --> I["SweepYield"]
-    D --> C
-    E --> J[".env"]
-```
+If you want to get specific, you can use flags like `--strategy sweep --vault <ADDR>` or set a loop limit with `--rounds 5`.
 
-| Module | Responsibility |
-|---|---|
-| `config.py` | Load env vars, validate Devnet-only, expose `Config` dataclass |
-| `wallet.py` | Key management (encrypted), RPC connection, airdrop with retry, transfer signing |
-| `strategies.py` | Pluggable `Strategy` protocol + built-in implementations |
-| `logger.py` | Emoji-coded console output with timestamps and quiet mode |
-| `cli.py` | `argparse` CLI: `run`, `status`, `fund`, `reset` |
-
----
-
-## CLI Reference
-
-| Command | Description | Key Flags |
-|---|---|---|
-| `status` | Print wallet address + balance | `--quiet` |
-| `fund` | Request Devnet airdrop | `--quiet` |
-| `run` | Hydrate + execute strategy loop | `--strategy`, `--rounds`, `--interval`, `--vault` |
-| `reset` | Delete wallet key file | — |
-
-### Examples
-
+### 💻 Web Dashboard (Recommended)
+You can also monitor and control the agent from a browser:
 ```bash
-# Single random transfer round
-python agent.py run
-
-# 5 rounds of random transfers, 10s apart
-python agent.py run --rounds 5 --interval 10
-
-# Sweep excess to a vault
-python agent.py run --strategy sweep --vault <BASE58_PUBKEY>
-
-# Infinite loop, quiet mode
-python agent.py run --rounds 0 --quiet
-
-# Nuke and start fresh
-python agent.py reset
+python dashboard/app.py
 ```
+Then open `http://localhost:5000` in your browser.
 
----
+## How it works
 
-## Security
+The project is split into a few core modules:
+- `wallet.py`: The engine that talks to Solana and signs transactions.
+- `strategies.py`: Where the actual "behavior" lives (like random transfers).
+- `logger.py`: Keeps the terminal output clean and readable.
+- `cli.py`: The entry point for all commands.
 
-- **Key encryption:** If `AUTOYIELD_PASSPHRASE` is set, the wallet key is encrypted at rest via Fernet (AES-128-CBC).
-- **Devnet only:** `Config` rejects any RPC URL that doesn't contain `devnet`.
-- **No mainnet exposure:** There are zero mainnet configurations in this project.
+## Running Tests
 
----
-
-## Testing
-
+If you want to make sure everything is working correctly:
 ```bash
-# Unit tests (mocked RPC — no network needed)
+# Quick local logic tests
 python -m pytest tests/test_wallet.py -v
 
-# Integration tests (live Devnet — requires network)
-python -m pytest tests/test_harness.py -v --timeout=120
+# Live Devnet integration tests (takes a bit longer)
+python -m pytest tests/test_harness.py -v
 ```
 
----
-
-## Agent Framework Integration
-
-See [SKILLS.md](SKILLS.md) for JSON schemas and integration examples for:
-- **LangChain** `StructuredTool`
-- **Fetch.ai** `uAgent`
-- Any framework that consumes JSON skill descriptors
-
----
-
 ## License
-
 MIT
