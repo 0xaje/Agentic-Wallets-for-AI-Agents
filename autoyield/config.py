@@ -55,6 +55,9 @@ class Config:
             float(os.getenv("AUTOYIELD_TRANSFER_SOL", "0.1"))
         )
     )
+    rpc_timeout: int = field(
+        default_factory=lambda: int(os.getenv("AUTOYIELD_RPC_TIMEOUT", "30"))
+    )
 
     def __post_init__(self) -> None:
         if "devnet" not in self.rpc_url.lower():

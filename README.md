@@ -43,6 +43,17 @@ python dashboard/app.py
 ```
 Then open `http://localhost:5000` in your browser.
 
+### 🏢 Scaling with Multi-Agent Manager
+Want to run multiple agents at once? Use the master orchestrator:
+```bash
+# Run status for 3 independent agents
+python multirun.py --count 3 status
+
+# Run 5 agents concurrently on the random strategy
+python multirun.py --count 5 run --rounds 5
+```
+Each agent will automatically manage its own `.key` file (e.g., `agent_1.key`, `agent_2.key`) to stay independent.
+
 ## How it works
 
 The project is split into a few core modules:
