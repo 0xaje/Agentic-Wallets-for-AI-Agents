@@ -33,7 +33,7 @@ def _derive_fernet_key(passphrase: str) -> bytes:
     return base64.urlsafe_b64encode(digest)
 
 
-def _encrypt(data: str, passphrase: str) -> str:
+def encrypt_key(data: str, passphrase: str) -> str:
     from cryptography.fernet import Fernet
 
     key = _derive_fernet_key(passphrase)
@@ -60,8 +60,19 @@ class AgentWallet:
     def __init__(self, config: Config | None = None, logger: AgentLogger | None = None) -> None:
         self.cfg = config or Config()
         self.log = logger or AgentLogger()
-        self.client = Client(self.cfg.rpc_url)
+        self.client = Client(self.cfg.rpc_url, timeout=self.cfg.rpc_timeout)
         self.keypair = self._load_or_create_keypair()
+
+    def retry_rpc(self, operation: str, func, *args, **kwargs):
+        """Helper to retry RPC calls on transient network failures."""
+        for attempt in range(1, 4):  # 3 attempts
+            try:
+                return func(*args, **kwargs)
+            except Exception as exc:
+                if attempt == 3:
+                    raise
+                self.log.warn(f"RPC {operation} failed (attempt {attempt}/3): {exc}")
+                time.sleep(2 * attempt)  # Simple backoff
 
     # -- Key Management --------------------------------------------------------
 
@@ -88,7 +99,7 @@ class AgentWallet:
         secret = str(kp)
 
         if self.cfg.passphrase:
-            secret = _encrypt(secret, self.cfg.passphrase)
+            secret = encrypt_key(secret, self.cfg.passphrase)
             self.log.shield("Key encrypted before writing to disk.")
         else:
             self.log.warn(
@@ -108,7 +119,10 @@ class AgentWallet:
 
     @property
     def balance_lamports(self) -> int:
-        return self.client.get_balance(self.keypair.pubkey()).value
+        res = self.retry_rpc(
+            "get_balance", self.client.get_balance, self.keypair.pubkey()
+        )
+        return res.value
 
     @property
     def balance_sol(self) -> float:
@@ -165,10 +179,15 @@ class AgentWallet:
                 )
             )
             # Fetch latest blockhash and build a signed transaction
-            blockhash = self.client.get_latest_blockhash().value.blockhash
+            blockhash_res = self.retry_rpc(
+                "get_latest_blockhash", self.client.get_latest_blockhash
+            )
+            blockhash = blockhash_res.value.blockhash
+            
             msg = Message([ix], self.keypair.pubkey())
             txn = Transaction([self.keypair], msg, blockhash)
-            response = self.client.send_transaction(txn)
+            
+            response = self.retry_rpc("send_transaction", self.client.send_transaction, txn)
             sig = str(response.value)
             self.log.target(f"On-chain reality altered: {sig}")
             return sig
