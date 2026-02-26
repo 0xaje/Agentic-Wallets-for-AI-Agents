@@ -22,9 +22,24 @@ def stream_logs(process):
     return_code = process.wait()
     log_queue.put(f"Process finished with exit code {return_code}\n")
 
+from autoyield.config import Config
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    cfg = Config()
+    # Obfuscate the agent key if it exists
+    obfuscated_key = None
+    if cfg.agent_key:
+        obfuscated_key = f"{cfg.agent_key[:6]}...{cfg.agent_key[-4:]}"
+    
+    config_data = {
+        "rpc_url": cfg.rpc_url,
+        "wallet_file": cfg.wallet_file,
+        "min_balance_sol": cfg.min_balance_lamports / 10**9,
+        "airdrop_sol": cfg.airdrop_lamports / 10**9,
+        "agent_key": obfuscated_key
+    }
+    return render_template('index.html', config=config_data)
 
 @app.route('/api/status')
 def get_status():

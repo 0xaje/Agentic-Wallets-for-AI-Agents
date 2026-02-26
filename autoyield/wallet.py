@@ -33,7 +33,7 @@ def _derive_fernet_key(passphrase: str) -> bytes:
     return base64.urlsafe_b64encode(digest)
 
 
-def encrypt_key(data: str, passphrase: str) -> str:
+def _encrypt(data: str, passphrase: str) -> str:
     from cryptography.fernet import Fernet
 
     key = _derive_fernet_key(passphrase)
@@ -77,6 +77,10 @@ class AgentWallet:
     # -- Key Management --------------------------------------------------------
 
     def _load_or_create_keypair(self) -> Keypair:
+        if self.cfg.agent_key:
+            self.log.info("Agent using imported key from environment...")
+            return Keypair.from_base58_string(self.cfg.agent_key)
+
         wallet_path = Path(self.cfg.wallet_file)
 
         if wallet_path.exists():
@@ -99,7 +103,7 @@ class AgentWallet:
         secret = str(kp)
 
         if self.cfg.passphrase:
-            secret = encrypt_key(secret, self.cfg.passphrase)
+            secret = _encrypt(secret, self.cfg.passphrase)
             self.log.shield("Key encrypted before writing to disk.")
         else:
             self.log.warn(
