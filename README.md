@@ -1,5 +1,7 @@
 # AutoYield
 
+[![AutoYield Demo Video](https://img.youtube.com/vi/qm1fEHADBCI/0.jpg)](https://youtu.be/qm1fEHADBCI)
+
 AutoYield is a small autonomous agent for the Solana Devnet. It manages its own wallet, handles its own funding via airdrops, and runs simple yield strategies without you having to touch it.
 
 ## What is this?
